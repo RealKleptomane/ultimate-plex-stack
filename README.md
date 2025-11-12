@@ -36,6 +36,8 @@ Currently you can choose from the **Basic** or the **Advanced** compose
 - **Plex Meta Manager:** Used to create collections, overlays, playlists and much more!
 - **Plex Auto Lanaguages:** Used to auto update the language of your Plex Tv episodes
 - **Recylarr:** Used to sync the config of trash guides with your arr stack
+- **Maintainerr:** Used to automate the removal of old media
+- **Watchtower:** Used to automatically update containers
 
 
 ## Dependencies
@@ -49,7 +51,7 @@ Currently you can choose from the **Basic** or the **Advanced** compose
 1. Clone this repository / Copy the docker-compose.yml file:
 
    ```
-   git clone https://github.com/DonMcD/ultimate-plex-stack.git
+   git clone https://github.com/RealKleptomane/ultimate-plex-stack.git
    ```
 2. Rename the advanced-compose or basic-compose to docker-compose.yml
 3. Fill in the required environment variables
@@ -62,8 +64,8 @@ Keep in mind some variable names have changed since this screenshot was taken
 
   
 File location examples:
-- {MEDIA_SHARE} = /share
-- {BASE_PATH} = /home/username/docker
+- {MEDIA_SHARE} = /mnt/media
+- {BASE_PATH} = /mnt/appdata
 
 To allow hardlinking to work (which you will definitely want!) you will have to use the same root folder in all of your container path. In this example we use "/share", so in the container it will look like "/share/downloads/tv"
 
@@ -82,7 +84,7 @@ Anytime you reference your media folder in a container you want the path to look
 
 ## Possible Additions
 
-1. Organizr - Creates a lovely dashboard to help navigate to all of your apps
+1. Homepage - Creates a lovely dashboard to help navigate to all of your apps https://gethomepage.dev/
 2. Portainer - Docker GUI
 3. UptimeKuma - Gives you the ability to monitor your services
 
