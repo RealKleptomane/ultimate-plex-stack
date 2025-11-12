@@ -1,3 +1,4 @@
+# Fork of DonMcD https://github.com/DonMcD/ultimate-plex-stack
 # Welcome to my Ultimate Plex Stack!
 #
 # Make sure to rename this file to "docker-compose.yaml" if you are using git clone
@@ -5,13 +6,25 @@
 # I was hoping this could maybe help some people out when setting up their stack
 #
 # Environment Variable Examples:
-# PUID = 99
-# GUID = 101
-# TZ = America/Edmonton
-# BASE_PATH = /home/username/docker
+# PUID = 1000
+# GUID = 1000
+# TZ = America/New_York
+# BASE_PATH = /mnt/appdata
 #
 # https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/ # This can be useful for establishing how the media will be presented below
 # MEDIA_SHARE = /mnt/media   # This can also be renamed to "SHARE" or "MEDIA" this is where you will present your media
+#
+# Plex:
+# PLEX_CLAIM = 
+# PLEX_TOKEN = 
+#
+# Membarr:
+# MEMBARR_TOKEN = 
+#
+# Remove any services you do not run or do not want to update automatically
+#
+# Watchtower:
+# UPDATE_SERVICES = plex radar sonarr readarr lidarr prowlarr autobrr overseerr flaresolverr qbittorrent tautulli maintainerr tdarr membarr bazarr plexautolanguages cross-seed plex-meta-manager wizarr dozzle unpackerr recyclarr
 #
 # NOTE: This is not a plug and play solution, some research / customization will be required to make this work as intended
 # Feel free to customize ie: remove/change/add containers as needed - one size does not fit all
@@ -206,6 +219,23 @@ services:
     ports:
       - 8181:8181
     restart: unless-stopped
+    
+  #Maintainerr - to auto remove requested media or a general Media Janitor
+  #
+  #This container requires direct access to media library
+  maintainerr:
+    image: ghcr.io/maintainerr/maintainerr:latest 
+    volumes:
+      - type: bind
+        source: ${MEDIA_SHARE}
+        target: /opt/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${GUID}
+      - TZ=${TZ}
+    ports:
+      - 6246:6246 
+    restart: unless-stopped
 
   #Tdarr - to transcode videos from one format to another like x265 or H.265
   #
@@ -374,4 +404,13 @@ services:
       - ${BASE_PATH}/recyclarr/config:/config
     environment:
       - TZ=${TZ}
- 
+
+# Watchtower is used to keep everything up to date automatically
+  watchtower:
+    image: containrrr/watchtower
+    command: 
+      - --interval 300 ${UPDATE_SERVICES}  # Check for updates every 5 minutes
+      - --cleanup=true
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
