@@ -28,7 +28,6 @@ Currently you can choose from the **Basic** or the **Advanced** compose
 - **Tautulli:** Analytics and monitoring for Plex.
 - **Bazarr:** Subtitle management for movies and TV shows.
 - **Autobrr:** Used to grab torrents immediately as they are released.
-- **Readarr:** Used to grab books and audiobooks.
 - **Lidarr:** Used to grab music.
 - **Flaresolverr:** Used as a proxy server to bypass Cloudflare and DDoS-GUARD protection.
 - **Dozzle:** Used to view the logs of any container.
