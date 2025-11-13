@@ -162,6 +162,7 @@ services:
   #This container requires direct access to media library
   maintainerr:
     image: ghcr.io/maintainerr/maintainerr:latest
+    container_name: maintainerr
     volumes:
       - type: bind
         source: ${MEDIA_SHARE}
@@ -345,6 +346,7 @@ services:
 # Watchtower is used to keep everything up to date automatically
   watchtower:
     image: containrrr/watchtower
+    container_name: watchtower
     command: 
       - --interval 300 ${UPDATE_SERVICES}  # Check for updates every 5 minutes
       - --cleanup=true
