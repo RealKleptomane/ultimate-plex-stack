@@ -1,6 +1,6 @@
 # <img src="/ultimate_plex_stack_transparent_bg.png" width="300px" alt="The Ultimate Plex Stack"></img>
 
-Welcome to my stack repository! This repository showcases my docker compose setup for managing various media-related services using Docker containers. The compose file is meant to be modifed to each users liking as I know, not everyone has the same requirements. Hope you enjoy!
+Welcome to my fork of a plex stack repository! This repository showcases my edits to DonMcD's docker compose setup for managing various media-related services using Docker containers. The compose file is meant to be modifed to each users liking as I know, not everyone has the same requirements. Hope you enjoy!
 
 Currently you can choose from the **Basic** or the **Advanced** compose
 
@@ -55,7 +55,6 @@ Currently you can choose from the **Basic** or the **Advanced** compose
 2. Rename the advanced-compose or basic-compose to docker-compose.yml
 3. Fill in the required environment variables
 5. Then enter the command ``` docker compose up -d ```
-6. OPTIONAL: Setup a reverse proxy so you can use radarr.my-domain.com instead of 192.168..... to access each of your apps
 
 ## Example of Environment variables in Portainer
 Keep in mind some variable names have changed since this screenshot was taken
@@ -84,6 +83,6 @@ Anytime you reference your media folder in a container you want the path to look
 ## Possible Additions
 
 1. Homepage - Creates a lovely dashboard to help navigate to all of your apps https://gethomepage.dev/
-2. Portainer - Docker GUI
+2. Portainer - Docker GUI https://www.portainer.io/
 3. UptimeKuma - Gives you the ability to monitor your services
 
