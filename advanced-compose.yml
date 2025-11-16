@@ -1,29 +1,5 @@
-# Welcome to my Ultimate Plex Stack!
-#
-# Make sure to rename this file to "docker-compose.yaml" if you are using git clone
-#
-# I was hoping this could maybe help some people out when setting up their stack
-#
-# Environment Variable Examples:
-# PUID = 99
-# GUID = 101
-# TZ = America/Edmonton
-# BASE_PATH = /home/username/docker
-#
-# https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/ # This can be useful for establishing how the media will be presented below
-# MEDIA_SHARE = /mnt/media   # This can also be renamed to "SHARE" or "MEDIA" this is where you will present your media
-#
-# NOTE: This is not a plug and play solution, some research / customization will be required to make this work as intended
-# Feel free to customize ie: remove/change/add containers as needed - one size does not fit all
-
----
 version: "3.0"
 
-networks: #This is used if you have a reverse proxy. I use Nginx Proxy Manager but anything will do
-  proxy: #You can remove this block if you are not planning to use a vpn
-    external:
-      name: proxy
-      
 services:
   #Plex - used to display the media
   #
@@ -44,8 +20,7 @@ services:
      - /dev/dri:/dev/dri #Required for plex HW transcoding / QuickSync
     volumes:
       - ${BASE_PATH}/plex/config:/config
-      - ${MEDIA_SHARE}/media/tv:/tv
-      - ${MEDIA_SHARE}/media/movies:/movies
+      - ${MEDIA_SHARE}/:/media
     restart: unless-stopped
     
   #Radarr - used to find movies automatically
@@ -59,10 +34,23 @@ services:
     volumes:
       - ${BASE_PATH}/radarr/config:/config
       - ${MEDIA_SHARE}:/share #Access to the entire share
-    #networks: #Does not connect to overseer if you use NPM
-    #  - proxy
     ports:
       - 7878:7878
+    restart: unless-stopped
+
+  #Radarr -request
+  radarr-request:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr-request
+    environment:
+      - PUID=${PUID}
+      - PGID=${GUID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/radarr-request/config:/config
+      - ${MEDIA_SHARE}:/share #Access to the entire share
+    ports:
+      - 7879:7878
     restart: unless-stopped
     
   #Sonarr - used to find tv shows automatically
@@ -76,26 +64,23 @@ services:
     volumes:
       - ${BASE_PATH}/sonarr/config:/config
       - ${MEDIA_SHARE}:/share #Access to the entire share
-    #networks: #Does not connect to overseer if you use NPM
-    #  - proxy
     ports:
       - 8989:8989
     restart: unless-stopped
-  
-  #Readarr - Used to download books
-  readarr:
-    image: lscr.io/linuxserver/readarr:develop
-    container_name: readarr
+
+  #Sonarr -request
+  sonarr-request:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr-request
     environment:
       - PUID=${PUID}
       - PGID=${GUID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH}/readarr/config:/config
-      - ${MEDIA_SHARE}:/share
-
+      - ${BASE_PATH}/sonarr-request/config:/config
+      - ${MEDIA_SHARE}:/share #Access to the entire share
     ports:
-      - 8787:8787
+      - 8990:8989
     restart: unless-stopped
     
   #Lidarr - Used to download music 
@@ -123,8 +108,6 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/prowlarr/config:/config
-    #networks:
-    #  - proxy
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -154,8 +137,6 @@ services:
     volumes:
       - ${BASE_PATH}/overseer/config:/config
       - ${MEDIA_SHARE}:/share #Access to the entire share
-    #networks:
-    #  - proxy
     ports:
       - 5055:5055
     restart: unless-stopped
@@ -185,7 +166,11 @@ services:
       - PGID=${GUID}
       - TZ=${TZ}
       - WEBUI_PORT=8080
-      - TORRENTING_PORT=8694 #Make sure to port forward this port in your router so you can seed more effectively
+      - TORRENTING_PORT=6881 #Make sure to port forward this port in your router so you can seed more effectively
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
     volumes:
       - ${BASE_PATH}/qbittorrent/config:/config
       - ${MEDIA_SHARE}:/share
@@ -201,10 +186,26 @@ services:
       - TZ=${TZ}
     volumes:
       - ${BASE_PATH}/tautulli:/config
-    networks:
-      - proxy
     ports:
       - 8181:8181
+    restart: unless-stopped
+    
+  #Maintainerr - to auto remove requested media or a general Media Janitor
+  #
+  #This container requires direct access to media library
+  maintainerr:
+    image: ghcr.io/maintainerr/maintainerr:latest
+    container_name: maintainerr
+    volumes:
+      - type: bind
+        source: ${MEDIA_SHARE}
+        target: /opt/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${GUID}
+      - TZ=${TZ}
+    ports:
+      - 6246:6246 
     restart: unless-stopped
 
   #Tdarr - to transcode videos from one format to another like x265 or H.265
@@ -374,4 +375,14 @@ services:
       - ${BASE_PATH}/recyclarr/config:/config
     environment:
       - TZ=${TZ}
- 
+
+# Watchtower is used to keep everything up to date automatically
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    command: 
+      - --interval 300 ${UPDATE_SERVICES}  # Check for updates every 5 minutes
+      - --cleanup=true
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
